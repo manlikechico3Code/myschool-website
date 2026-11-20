@@ -227,7 +227,7 @@ const Admission = ({ onBack }) => {
           <div className='md:col-span-2 flex flex-col gap-4 pt-4 sm:flex-row sm:justify-between'>
             <button
               type='button'
-              onClick={onBack}
+              onClick={onBack || (() => navigate('/'))}
               className='rounded-xl border border-blue-700 bg-white px-6 py-3 text-sm font-bold uppercase tracking-wide text-blue-800 transition hover:bg-blue-50'
             >
               Back to Home

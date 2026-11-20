@@ -4,9 +4,13 @@ import './Admin.css'
 function AdminLayout() {
   const navigate = useNavigate()
 
-  const handleLogout = () => {
-    localStorage.removeItem('isAdmin')
-    navigate('/admin/login')
+  const handleLogout = async () => {
+    try {
+      await fetch('/api/admin/logout', { method: 'POST' })
+    } finally {
+      localStorage.removeItem('isAdmin')
+      navigate('/signin')
+    }
   }
 
   return (
@@ -16,6 +20,7 @@ function AdminLayout() {
         <NavLink to='/admin/dashboard'>Dashboard</NavLink>
         <NavLink to='/admin/approvals'>Approvals</NavLink>
         <NavLink to='/admin/manage'>Manage</NavLink>
+        <NavLink to='/admin/admissions-window'>Admission Window</NavLink>
 
         <button className='logout-btn' onClick={handleLogout}>
           Logout

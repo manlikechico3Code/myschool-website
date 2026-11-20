@@ -6,6 +6,22 @@ const {
   setApplicantCookie,
 } = require('../utils/applicantAuth');
 const Admission = require('../Models/admission');
+const AdmissionsSettings = require('../Models/admissionsSettings');
+const { isAdmissionWindowOpen } = require('../utils/admissionWindow');
+
+const getAdmissionsWindowStatus = async (_req, res, next) => {
+  try {
+    const settings = await AdmissionsSettings.findOne({ key: 'admissions' }).lean();
+    res.json({
+      isOpen: isAdmissionWindowOpen(settings),
+      isUpcoming: Boolean(settings && settings.opensAt > new Date()),
+      opensAt: settings?.opensAt || null,
+      closesAt: settings?.closesAt || null,
+    });
+  } catch (error) {
+    next(error);
+  }
+};
 
 const getAdmissions = async (_req, res, next) => {
   try {
@@ -18,6 +34,11 @@ const getAdmissions = async (_req, res, next) => {
 
 const createAdmission = async (req, res, next) => {
   try {
+    const settings = await AdmissionsSettings.findOne({ key: 'admissions' });
+    if (!isAdmissionWindowOpen(settings)) {
+      return res.status(403).json({ message: 'Admissions are currently closed.' });
+    }
+
     const body = req.body || {};
     const email = typeof body.email === 'string' ? body.email.trim().toLowerCase() : '';
     const password = typeof body.password === 'string' ? body.password : '';
@@ -102,4 +123,9 @@ const updateAdmissionStatus = async (req, res, next) => {
   }
 };
 
-module.exports = { getAdmissions, createAdmission, updateAdmissionStatus };
+module.exports = {
+  getAdmissions,
+  getAdmissionsWindowStatus,
+  createAdmission,
+  updateAdmissionStatus,
+};
